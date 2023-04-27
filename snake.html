@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Snake</title>
+	<style>
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 100vh;
+			margin: 0;
+			background-color: #f0f0f0;
+		}
+		canvas {
+			border: 1px solid #000;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+	<script>
+		const canvas = document.getElementById('gameCanvas');
+		const ctx = canvas.getContext('2d');
+		
+		const snakeSize = 20;
+		const initialSnakePos = { x: 200, y: 200};
+		const initialDirection = { x: 1, y: 0 };
+		const initialSnakeLength = 5;
+		const gameSpeed = 150;
+
+		let snake = [{ x: initialSnakePos.x, y: initialSnakePos.y }];
+		let direction = { ...initialDirection};
+		let food = getRandomPosition();
+		let snakeLength = initialSnakeLength;
+
+		function getRandomPosition() {
+			const gridSize = canvas.width / snakeSize;
+			const randomX = Math.floor(Math.random() * gridSize) * snakeSize;
+			const randomY = Math.floor(Math.random() * gridSize) * snakeSize;	
+			return { x: randomX, y: randomY };
+			}
+
+		function positionsEqual(pos1, pos2) {
+			return pos1.x === pos2.x && pos1.y === pos2.y;
+			}
+		function checkBoundaryCollision(pos) {
+			return pos.x < 0 || pos.x >= canvas.width || pos.y < 0 || pos.y >= canvas.height
+			}
+		function drawRectangle(x, y, color) {
+			ctx.fillStyle = color;
+			ctx.fillRect(x, y, snakeSize, snakeSize);
+			}
+		function gameLoop() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		const newHeadPos = {
+			x: snake[0].x + direction.x * snakeSize,
+			y: snake[0].y + direction.y * snakeSize,
+			};
+
+		if (checkBoundaryCollision(newHeadPos) || snake.some(segment => positionsEqual(segment, newHeadPos))) {
+			alert('Game Over!');
+			location.reload();
+			return;
+			}
+
+		snake.unshift(newHeadPos);
+		
+		if (positionsEqual(newHeadPos, food)) {
+			snakeLength++;
+			food = getRandomPosition();
+			} else {
+			snake.pop();
+			}
+
+		for (const segment of snake) {
+			drawRectangle(segment.x, segment.y, 'green');
+			}
+		drawRectangle(food.x, food.y, 'red');
+		
+		setTimeout(gameLoop, gameSpeed);
+		}
+		
+
+		function handleKeyDown(event) {
+			const newDirection = { ...direction };
+		
+			switch (event.key) {
+				case 'ArrowUp':
+				case 'w':
+				newDirection.x = 0;
+				newDirection.y = -1;
+				break;
+				case 'ArrowDown':
+				case 's':
+				newDirection.x = 0;
+				newDirection.y = 1;
+				break;
+				case 'ArrowLeft':
+				case 'a':
+				newDirection.x = -1;
+				newDirection.y = 0;
+				break;
+				case 'ArrowRight':
+				case 'd':
+				newDirection.x = 1;
+				newDirection.y = 0;
+				break;
+				default:
+				return;
+				}
+
+		if (-newDirection.x !== direction.x || -newDirection.Y !== direction.y) {
+			direction = newDirection;
+				}
+				}
+		window.addEventListener('keydown', handleKeyDown);
+		gameLoop();
+	</script>
+</body>
+</html>
+	
